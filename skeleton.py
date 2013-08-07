@@ -94,34 +94,48 @@ def line_skeletons(label_image):
         connect_peaks()
 
 
-def fiji_skeletonize_3d(label_image, temp_filename='binary_label.tif'):
+def fiji_skeletonize_3d(label_image, temp_fout='binary_label.tif',
+                        temp_fin='binary_skeleton.tif'):
     """Compute the skeleton of every nonzero object in the input image.
 
     Parameters
     ----------
     label_image : 3D np.ndarray of int
         The input segmentation.
-    temp_filename : string, optional
+    temp_fout : string, optional
         The file in which to store binary images before skeletonizing.
+    temp_fin : string, optional
+        The file Fiji should store the skeletons in.
 
     Returns
     -------
     skeletons : 3D np.ndarray of int
         The skeleton maps of each segment.
     """
+    temp_fout = os.path.abspath(temp_fout)
+    temp_fin = os.path.abspath(temp_fin)
     labels = np.unique(label_image)
     if labels[0] == 0:
         labels = labels[1:]
     skeletons = np.zeros_like(label_image)
-    for label in labels:
+    for i, label in enumerate(labels):
         binary_segment = 255 * (label_image == label).astype(np.uint8)
-        imsave(temp_filename, binary_segment)
-        ret = sp.run([fiji_path, 'fiji_skeletonize_macro.py', temp_filename])
+        imsave(temp_fout, binary_segment)
+        try:
+            # fiji doesn't automatically overwrite (apparently), so remove
+            # skeleton file.
+            os.remove(temp_fin)
+        except OSError:
+            pass
+        ret = sp.call([fiji_path,
+                       'fiji_skeleton_macro.py', temp_fout, temp_fin])
         if ret != 0:
             print "error with label %d." % label
         else:
-            binary_skeleton = imread(temp_filename).astype(bool)
+            binary_skeleton = imread(temp_fin).astype(bool)
             skeletons[binary_skeleton] = label
             print "label %d completed." % label
+        if i % 10 == 1:
+            imsave('temp-skeletons-file.tif', skeletons)
     return skeletons
 
