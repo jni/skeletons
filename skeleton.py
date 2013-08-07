@@ -138,7 +138,8 @@ def fiji_skeletonize_3d(label_image, temp_fout='binary_label.tif',
             binary_skeleton = imread(temp_fin).astype(bool)
             skeletons[binary_skeleton] = label
             print "label %d completed." % label
-        if i % 10 == 1:
+        # save volume every 10 iterations.
+        if i % 10 == 0:
             imsave('temp-skeletons-file.tif', skeletons)
     return skeletons
 
