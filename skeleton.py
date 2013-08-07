@@ -127,7 +127,7 @@ def fiji_skeletonize_3d(label_image, temp_fout='binary_label.tif',
             os.remove(temp_fin)
         except OSError:
             pass
-        ret = sp.call([fiji_path,
+        ret = sp.call([fiji_path, '--headless',
                        'fiji_skeleton_macro.py', temp_fout, temp_fin])
         if ret != 0:
             print "error with label %d." % label
