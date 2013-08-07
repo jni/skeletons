@@ -114,11 +114,14 @@ def fiji_skeletonize_3d(label_image, temp_fout='binary_label.tif',
     """
     temp_fout = os.path.abspath(temp_fout)
     temp_fin = os.path.abspath(temp_fin)
-    labels = np.unique(label_image)
-    if labels[0] == 0:
-        labels = labels[1:]
+    segment_sizes = np.bincount(label_image.ravel())
+    labels_largest_first = segment_sizes.argsort()[::-1]
     skeletons = np.zeros_like(label_image)
-    for i, label in enumerate(labels):
+    for i, label in enumerate(labels_largest_first):
+        if segment_sizes[label] == 0:
+            break
+        if label == 0:
+            continue
         binary_segment = 255 * (label_image == label).astype(np.uint8)
         imsave(temp_fout, binary_segment)
         try:
