@@ -19,6 +19,7 @@ def ij_binary_skeletonize(impath_in, impath_out):
     """
     imp = IJ.openImage(impath_in)
     IJ.run(imp, "Skeletonize (2D/3D)", "")
+    IJ.run(imp, "Analyze Skeleton (2D/3D)", "prune=none prune")
     IJ.saveAs(imp, "Tiff", impath_out)
     imp.close()
 
